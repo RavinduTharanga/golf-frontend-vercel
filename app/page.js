@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useMemo, useState } from "react";
+import { signOut } from "next-auth/react";
 
 const CHECKPOINTS = ["Pre-Tournament", "After Round 1", "After Round 2", "After Round 3"];
 
@@ -157,7 +158,15 @@ export default function Home() {
 
   return (
     <main style={{ maxWidth: 1100, margin: "0 auto", padding: "24px 16px" }}>
-      <h1 style={{ fontSize: 28 }}>⛳ Fairway Edge Predictions</h1>
+      <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+        <h1 style={{ fontSize: 28 }}>⛳ Fairway Edge Predictions</h1>
+        <button
+          onClick={() => signOut({ callbackUrl: "/login" })}
+          style={{ padding: "8px 14px", borderRadius: 6, border: "1px solid #30363d", background: "#21262d", color: "#fff", cursor: "pointer" }}
+        >
+          Log out
+        </button>
+      </div>
 
       <div style={{ display: "flex", gap: 8, margin: "16px 0" }}>
         {CHECKPOINTS.map((label) => (
