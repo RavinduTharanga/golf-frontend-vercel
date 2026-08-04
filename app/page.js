@@ -475,7 +475,7 @@ export default function Home() {
   return (
     <main style={{ maxWidth: 1100, margin: "0 auto", padding: "24px 16px" }}>
       <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
-        <h1 style={{ fontSize: 28 }}>⛳ Fairway Edge Predictions</h1>
+        <h1 style={{ fontSize: 28 }}>⛳ Fairway  Predictions</h1>
         <button
           onClick={() => signOut({ callbackUrl: "/login" })}
           style={{ padding: "8px 14px", borderRadius: 6, border: "1px solid #30363d", background: "#21262d", color: "#fff", cursor: "pointer" }}
