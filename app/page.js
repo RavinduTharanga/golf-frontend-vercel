@@ -530,7 +530,7 @@ export default function Home() {
           {!liveMatches && (
             <div style={infoBoxStyle}>
               {liveEventName && liveEventName !== tournament
-                ? `Live stats are for '${liveEventName}' — ${tournament} hasn't teed off yet.`
+                ? `Live stats are for '${tournament}' — ${liveEventName} hasn't teed off yet.`
                 : `${tournament} hasn't started yet — live position/SG will appear once round 1 tees off.`}
             </div>
           )}
