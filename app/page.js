@@ -527,13 +527,13 @@ export default function Home() {
               Odds board is still showing &lsquo;{oddsEventName}&rsquo; — not open yet for {tournament}.
             </div>
           )}
-          {!liveMatches && (
-            <div style={infoBoxStyle}>
-              {liveEventName && liveEventName !== tournament
-                ? `Live stats are for '${tournament}' — ${liveEventName} hasn't teed off yet.`
-                : `${tournament} hasn't started yet — live position/SG will appear once round 1 tees off.`}
-            </div>
-          )}
+          // {!liveMatches && (
+          //   <div style={infoBoxStyle}>
+          //     {liveEventName && liveEventName !== tournament
+          //       ? `Live stats are for '${liveEventName}' — ${tournament} hasn't teed off yet.`
+          //       : `${tournament} hasn't started yet — live position/SG will appear once round 1 tees off.`}
+          //   </div>
+          // )}
 
           <h3 style={{ marginTop: 24 }}>Top 10 model picks — {checkpoint}</h3>
           <div style={{ overflowX: "auto" }}>
