@@ -31,23 +31,23 @@ export default function AdUnit({ slot, style }) {
   if (!clientId) {
     // Layout placeholder so you can see where the ad will sit before
     // AdSense is approved. Remove this block once real ads are live.
-    return (
-      <div
-        style={{
-          ...style,
-          display: "flex",
-          alignItems: "center",
-          justifyContent: "center",
-          background: "#161b22",
-          border: "1px dashed #30363d",
-          color: "#8b949e",
-          fontSize: 13,
-          minHeight: 100,
-        }}
-      >
-        Ad placeholder (set NEXT_PUBLIC_ADSENSE_CLIENT_ID once AdSense is approved)
-      </div>
-    );
+    // return (
+    //   <div
+    //     style={{
+    //       ...style,
+    //       display: "flex",
+    //       alignItems: "center",
+    //       justifyContent: "center",
+    //       background: "#161b22",
+    //       border: "1px dashed #30363d",
+    //       color: "#8b949e",
+    //       fontSize: 13,
+    //       minHeight: 100,
+    //     }}
+    //   >
+    //     Ad placeholder (set NEXT_PUBLIC_ADSENSE_CLIENT_ID once AdSense is approved)
+    //   </div>
+    // );
   }
 
   return (
