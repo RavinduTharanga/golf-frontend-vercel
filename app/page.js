@@ -688,7 +688,7 @@ const gridStyle = {
 };
 const cardLinkStyle = { textDecoration: "none", color: "inherit" };
 const cardStyle = {
-  background: "#161b22",
+  background: "#d9dee5",
   border: "1px solid #30363d",
   borderRadius: 8,
   overflow: "hidden",
