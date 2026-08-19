@@ -40,7 +40,7 @@ export default function RootLayout({ children }) {
           />
         )}
       </head>
-      <body style={{ margin: 0, fontFamily: "system-ui, sans-serif", background: "#0e1117", color: "#fafafa" }}>
+      <body style={{ margin: 0, fontFamily: "system-ui, sans-serif", background: "#b3b9c4", color: "#fafafa" }}>
         <Providers>
           <Navbar />
           {children}
