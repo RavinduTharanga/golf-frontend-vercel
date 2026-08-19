@@ -8,9 +8,7 @@
     "start": "next start"
   },
   "dependencies": {
-    "@aws-sdk/client-dynamodb": "^3.658.0",
-    "@aws-sdk/lib-dynamodb": "^3.658.0",
-    "bcryptjs": "^2.4.3",
+    "@aws-sdk/client-cognito-identity-provider": "^3.658.0",
     "next": "14.2.35",
     "next-auth": "^4.24.7",
     "react": "^18.3.1",
