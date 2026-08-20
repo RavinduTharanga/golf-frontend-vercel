@@ -653,7 +653,7 @@ export default function HomePage() {
 
       <h2 style={{ fontSize: 22, marginBottom: 16 }}>Latest PGA Tour News</h2>
 
-      {loading && <div style={{ color: "#8b949e" }}>Loading news...</div>}
+      {loading && <div style={{ color: "#1a1b1b" }}>Loading news...</div>}
       {error && <div style={{ color: "#f85149" }}>Couldn&rsquo;t load news: {error}</div>}
 
       <div style={gridStyle}>
