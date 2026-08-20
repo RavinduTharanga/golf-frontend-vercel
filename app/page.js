@@ -651,7 +651,7 @@ export default function HomePage() {
       {/* Top ad placement */}
       <AdUnit slot="1111111111" style={{ marginBottom: 32 }} />
 
-      <h2 style={{ fontSize: 22, marginBottom: 16 }}>Latest PGA Tour News</h2>
+      <h2 style={{ color:"#1a1b1b" ,fontSize: 22, marginBottom: 16 }}>Latest PGA Tour News</h2>
 
       {loading && <div style={{ color: "#1a1b1b" }}>Loading news...</div>}
       {error && <div style={{ color: "#f85149" }}>Couldn&rsquo;t load news: {error}</div>}
