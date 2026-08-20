@@ -15,7 +15,7 @@ export async function GET() {
 
   // NewsAPI's free tier blocks direct browser calls (CORS) and requires
   // requests to come from a server -- this route is that server.
-  const url = `https://newsapi.org/v2/everything?q=PGA%20Tour%20golf&language=en&sortBy=publishedAt&pageSize=9&apiKey=${apiKey}`;
+  const url = `https://newsapi.org/v2/everything?q=%22PGA%20Tour%22&language=en&sortBy=publishedAt&pageSize=9&apiKey=${apiKey}`;
 
   try {
     const res = await fetch(url, { next: { revalidate: 3600 } });
