@@ -641,19 +641,19 @@ export default function HomePage() {
 
   return (
     <main style={{ maxWidth: 1100, margin: "0 auto", padding: "32px 16px" }}>
-      {/* <section style={{ textAlign: "center", marginBottom: 32 }}>
+      <section style={{ textAlign: "center", marginBottom: 32 }}>
         <h1 style={{ fontSize: 32, marginBottom: 8 }}>⛳ Fairway Edge</h1>
         <p style={{ color: "#8b949e", fontSize: 16 }}>
           Data-driven top-10 predictions for every PGA Tour event, updated after each round.
         </p>
-      </section> */}
+      </section>
 
       {/* Top ad placement */}
       <AdUnit slot="1111111111" style={{ marginBottom: 32 }} />
 
-      <h2 style={{ color:"#1a1b1b" ,fontSize: 22, marginBottom: 16 }}>Latest PGA Tour News</h2>
+      <h2 style={{ fontSize: 22, marginBottom: 16 }}>Latest PGA Tour News</h2>
 
-      {loading && <div style={{ color: "#1a1b1b" }}>Loading news...</div>}
+      {loading && <div style={{ color: "#8b949e" }}>Loading news...</div>}
       {error && <div style={{ color: "#f85149" }}>Couldn&rsquo;t load news: {error}</div>}
 
       <div style={gridStyle}>
