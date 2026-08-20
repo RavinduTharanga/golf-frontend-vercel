@@ -11,6 +11,7 @@ export default function Navbar() {
       <Link href="/" style={logoStyle}>⛳ Fairway Edge</Link>
 
       <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
+        <Link href="/about" style={linkStyle}>About</Link>
         {status === "loading" ? null : session ? (
           <>
             <Link href="/dashboard" style={linkStyle}>Dashboard</Link>
