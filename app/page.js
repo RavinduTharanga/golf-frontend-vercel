@@ -641,12 +641,12 @@ export default function HomePage() {
 
   return (
     <main style={{ maxWidth: 1100, margin: "0 auto", padding: "32px 16px" }}>
-      <section style={{ textAlign: "center", marginBottom: 32 }}>
+      {/* <section style={{ textAlign: "center", marginBottom: 32 }}>
         <h1 style={{ fontSize: 32, marginBottom: 8 }}>⛳ Fairway Edge</h1>
         <p style={{ color: "#8b949e", fontSize: 16 }}>
           Data-driven top-10 predictions for every PGA Tour event, updated after each round.
         </p>
-      </section>
+      </section> */}
 
       {/* Top ad placement */}
       <AdUnit slot="1111111111" style={{ marginBottom: 32 }} />
