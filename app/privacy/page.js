@@ -52,7 +52,7 @@ export default function PrivacyPolicyPage() {
       <h2 style={sectionHeading}>Contact</h2>
       <p style={{ color: "#8b949e", fontSize: 14 }}>
         Questions about this policy can be directed to the site owner via the contact
-        information on the About page.
+        information on the page.
       </p>
     </main>
   );
