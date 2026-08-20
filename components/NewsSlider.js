@@ -51,7 +51,7 @@ export default function NewsSlider({ articles }) {
             aria-label={`Go to slide ${i + 1}`}
             style={{
               ...dotStyle,
-              background: i === index ? "var(--accent)" : "rgba(255,255,255,0.4)",
+              background: i === index ? "#ff4b4b" : "rgba(255,255,255,0.4)",
             }}
           />
         ))}
@@ -65,8 +65,7 @@ const sliderStyle = {
   borderRadius: 10,
   overflow: "hidden",
   marginBottom: 32,
-  background: "var(--surface)",
-  border: "1px solid var(--border)",
+  background: "#161b22",
 };
 const imageWrapStyle = {
   position: "relative",
