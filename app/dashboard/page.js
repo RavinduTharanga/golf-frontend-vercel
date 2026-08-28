@@ -356,7 +356,7 @@ export default function DashboardPage() {
   const locked = isPremiumCheckpoint && !subLoading && !subscribed;
 
   useEffect(() => {
-    fetch("/api/subscription-status")
+    fetch("/api/subscription/status")
       .then((r) => r.json())
       .then((data) => setSubscribed(!!data.active))
       .finally(() => setSubLoading(false));

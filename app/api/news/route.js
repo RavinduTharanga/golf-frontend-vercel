@@ -20,7 +20,7 @@ export async function GET() {
   try {
     const res = await fetch(url, { next: { revalidate: 3600 } });
     if (!res.ok) {
-      const body = await res.json().catch(() => ({}));
+      const body = await res.json().catch(() => ({}));  
       return NextResponse.json(
         { error: body.message || `NewsAPI returned ${res.status}` },
         { status: res.status }
