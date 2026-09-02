@@ -350,6 +350,11 @@ export default function DashboardPage() {
   const [subscribed, setSubscribed] = useState(false);
   const [subLoading, setSubLoading] = useState(true);
   const [checkoutLoading, setCheckoutLoading] = useState(false);
+  const [aiRanking, setAiRanking] = useState(null);
+  const [aiLoading, setAiLoading] = useState(false);
+  const [aiError, setAiError] = useState(null);
+  const [aiGeneratedAt, setAiGeneratedAt] = useState(null);
+  const [aiChecked, setAiChecked] = useState(false);
   const liveNow = useMemo(() => isTournamentLiveET(), []);
 
   const isPremiumCheckpoint = checkpoint !== "Pre-Tournament";
@@ -486,6 +491,53 @@ export default function DashboardPage() {
     return { text: `${edge.toFixed(1)}%`, color: "#f85149" };
   }
 
+  useEffect(() => {
+    if (checkpoint !== "Pre-Tournament" || !preds || preds.length === 0) return;
+
+    let cancelled = false;
+    setAiChecked(false);
+    setAiRanking(null);
+    setAiError(null);
+
+    fetch(`/api/ai-rank?tournament=${encodeURIComponent(tournament)}&year=${encodeURIComponent(year)}`)
+      .then((r) => r.json())
+      .then((data) => {
+        if (cancelled) return;
+        if (data.players) {
+          setAiRanking(data.players);
+          setAiGeneratedAt(data.generatedAt);
+        }
+      })
+      .catch(() => {})
+      .finally(() => {
+        if (!cancelled) setAiChecked(true);
+      });
+
+    return () => {
+      cancelled = true;
+    };
+  }, [checkpoint, tournament, year, preds]);
+
+  async function handleGenerateAiRanking() {
+    setAiLoading(true);
+    setAiError(null);
+    try {
+      const res = await fetch("/api/ai-rank", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ tournament, year, rows: preds }),
+      });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error || "Failed to generate AI ranking");
+      setAiRanking(data.players);
+      setAiGeneratedAt(data.generatedAt);
+    } catch (e) {
+      setAiError(String(e.message || e));
+    } finally {
+      setAiLoading(false);
+    }
+  }
+
   return (
     <main style={{ maxWidth: 1100, margin: "0 auto", padding: "24px 16px" }}>
       <h1 style={{ fontSize: 28 }}>⛳ Fairway Edge Predictions</h1>
@@ -587,6 +639,54 @@ export default function DashboardPage() {
             </table>
           </div>
 
+          {checkpoint === "Pre-Tournament" && (
+            <>
+              <h3 style={{ marginTop: 32 }}>AI-enhanced ranking</h3>
+              {!aiRanking && aiChecked && (
+                <div style={infoBoxStyle}>
+                  No AI ranking yet for {tournament} {year}.{" "}
+                  <button onClick={handleGenerateAiRanking} disabled={aiLoading} style={aiButtonStyle}>
+                    {aiLoading ? "Researching players (this can take a minute)..." : "Generate AI ranking"}
+                  </button>
+                </div>
+              )}
+              {aiError && <div style={{ color: "#f85149", marginTop: 8 }}>Error: {aiError}</div>}
+              {aiRanking && (
+                <>
+                  {aiGeneratedAt && (
+                    <div style={{ color: "#8b949e", fontSize: 12, marginBottom: 8 }}>
+                      Generated {new Date(aiGeneratedAt).toLocaleString()}
+                    </div>
+                  )}
+                  <div style={{ overflowX: "auto" }}>
+                    <table style={tableStyle}>
+                      <thead>
+                        <tr>
+                          {["AI Rank", "Player", "Model Rank", "AI Score", "Why"].map((h) => (
+                            <th key={h} style={thStyle}>{h}</th>
+                          ))}
+                        </tr>
+                      </thead>
+                      <tbody>
+                        {[...aiRanking]
+                          .sort((a, b) => a.ai_rank - b.ai_rank)
+                          .map((p, i) => (
+                            <tr key={i}>
+                              <td style={tdStyle}>{p.ai_rank}</td>
+                              <td style={tdStyle}>{p.player_name}</td>
+                              <td style={tdStyle}>{p.original_rank ?? "—"}</td>
+                              <td style={tdStyle}>{p.ai_score != null ? `${Math.round(p.ai_score * 100)}%` : "—"}</td>
+                              <td style={{ ...tdStyle, fontSize: 13, color: "#8b949e" }}>{p.rationale}</td>
+                            </tr>
+                          ))}
+                      </tbody>
+                    </table>
+                  </div>
+                </>
+              )}
+            </>
+          )}
+
           {liveMatches && liveRows.length > 0 && (
             <>
               <h3 style={{ marginTop: 32 }}>Live leaderboard</h3>
@@ -639,6 +739,18 @@ const subscribeButtonStyle = {
   color: "#fff",
   fontWeight: 600,
   fontSize: 15,
+  cursor: "pointer",
+};
+
+const aiButtonStyle = {
+  marginLeft: 8,
+  padding: "6px 12px",
+  borderRadius: 6,
+  border: "none",
+  background: "#ff4b4b",
+  color: "#fff",
+  fontWeight: 600,
+  fontSize: 13,
   cursor: "pointer",
 };
 
