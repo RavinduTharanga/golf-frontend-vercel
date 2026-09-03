@@ -225,7 +225,16 @@ export default function DashboardPage() {
 
   return (
     <main style={{ maxWidth: 1100, margin: "0 auto", padding: "24px 16px" }}>
-      <h1 style={{ fontSize: 28 }}>⛳ Fairway Edge Predictions</h1>
+      <h1 style={{ fontSize: 28, display: "flex", alignItems: "center", gap: 12 }}>
+        <svg width="30" height="30" viewBox="0 0 48 48" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+          <circle cx="9" cy="37" r="1.75" fill="#3fb950" opacity="0.2" />
+          <circle cx="15.5" cy="30" r="2.75" fill="#3fb950" opacity="0.35" />
+          <circle cx="22" cy="23" r="4" fill="#3fb950" opacity="0.55" />
+          <circle cx="28.5" cy="16.5" r="5.25" fill="#3fb950" opacity="0.8" />
+          <circle cx="35" cy="11" r="7" fill="#e6edf3" />
+        </svg>
+        Fairway Edge Predictions
+      </h1>
 
       <div style={{ display: "flex", gap: 8, margin: "16px 0" }}>
         {CHECKPOINTS.map((label) => (
