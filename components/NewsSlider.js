@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { trackEvent } from "@/lib/gtag";
 
 const SLIDE_DURATION_MS = 6000;
 
@@ -25,7 +26,13 @@ export default function NewsSlider({ articles }) {
 
   return (
     <div style={sliderStyle}>
-      <a href={current.url} target="_blank" rel="noopener noreferrer" style={{ textDecoration: "none" }}>
+      <a
+        href={current.url}
+        target="_blank"
+        rel="noopener noreferrer"
+        style={{ textDecoration: "none" }}
+        onClick={() => trackEvent("news_article_click", { title: current.title, source: current.source })}
+      >
         <div style={imageWrapStyle}>
           {/* Blurred, stretched copy of the same image fills the background
               so there's no black letterboxing when the photo's aspect
