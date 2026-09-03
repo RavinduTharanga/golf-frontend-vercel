@@ -16,11 +16,11 @@ export default function AboutPage() {
 
       <h2 style={sectionHeading}>How the predictions work</h2>
       <p>
-        The model is trained on player-level strokes-gained data going back to 2004,
-        covering career form, course history, and recent performance trends. Once a round
-        finishes, that round&rsquo;s live results are folded in as additional features, so
-        later-round predictions account for how players are actually scoring that week, not
-        just their history coming in.
+        Fairway Edge combines a statistical model of player form and course history with AI
+        analysis of current news, player form, and course fit to produce each week&rsquo;s
+        top-10 picks. Once a round finishes, that round&rsquo;s live results are factored in
+        as well, so later-round predictions account for how players are actually scoring
+        that week, not just their history coming in.
       </p>
 
       <h2 style={sectionHeading}>What&rsquo;s free vs. subscriber-only</h2>

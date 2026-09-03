@@ -30,7 +30,7 @@ export default function PrivacyPolicyPage() {
       <h2 style={sectionHeading}>Third-party services</h2>
       <p>This site uses the following third-party services, each with its own privacy practices:</p>
       <ul>
-        <li><strong>Amazon Web Services (Cognito, DynamoDB, Lambda, S3)</strong> -- account authentication and data storage</li>
+        <li><strong>Amazon Web Services</strong> -- account authentication and data storage</li>
         <li><strong>Stripe</strong> -- subscription payment processing</li>
         <li><strong>NewsAPI.org</strong> -- news headlines shown on the homepage</li>
         <li><strong>Google AdSense</strong> -- displays advertisements. Google may use cookies to serve ads based on your visits to this and other websites. You can opt out of personalized advertising by visiting <a href="https://adssettings.google.com" target="_blank" rel="noopener noreferrer" style={{ color: "#58a6ff" }}>Google Ads Settings</a>.</li>
