@@ -2,41 +2,33 @@ import { NextResponse } from "next/server";
 
 export const runtime = "nodejs";
 
-// Cache for 1 hour -- NewsAPI's free tier caps you at 100 requests/day,
-// so this keeps you well under that even with real traffic, since every
-// visitor within the same hour shares one cached response.
-export const revalidate = 3600;
+// ESPN's site API is undocumented and unauthenticated -- no key needed,
+// but it's also unversioned, so cache modestly to avoid hammering it
+// and to stay resilient if it briefly changes shape.
+export const revalidate = 300;
+
+const ESPN_NEWS_URL = "https://site.web.api.espn.com/apis/site/v2/sports/golf/pga/news";
 
 export async function GET() {
-  const apiKey = process.env.NEWSAPI_KEY;
-  if (!apiKey) {
-    return NextResponse.json({ error: "Missing NEWSAPI_KEY environment variable." }, { status: 500 });
-  }
-
-  // NewsAPI's free tier blocks direct browser calls (CORS) and requires
-  // requests to come from a server -- this route is that server.
-  const url = `https://newsapi.org/v2/everything?q=%22PGA%20Tour%22&language=en&sortBy=publishedAt&pageSize=9&apiKey=${apiKey}`;
-
   try {
-    const res = await fetch(url, { next: { revalidate: 3600 } });
+    const res = await fetch(ESPN_NEWS_URL, {
+      headers: { "User-Agent": "Mozilla/5.0" },
+      next: { revalidate: 300 },
+    });
     if (!res.ok) {
-      const body = await res.json().catch(() => ({}));  
-      return NextResponse.json(
-        { error: body.message || `NewsAPI returned ${res.status}` },
-        { status: res.status }
-      );
+      return NextResponse.json({ error: `ESPN API returned ${res.status}` }, { status: res.status });
     }
     const data = await res.json();
 
     const articles = (data.articles || [])
-      .filter((a) => a.title && a.title !== "[Removed]")
+      .filter((a) => a.headline)
       .map((a) => ({
-        title: a.title,
+        title: a.headline,
         description: a.description,
-        url: a.url,
-        image: a.urlToImage,
-        source: a.source?.name || "",
-        publishedAt: a.publishedAt,
+        url: a.links?.web?.href,
+        image: a.images?.[0]?.url,
+        source: a.byline || "ESPN",
+        publishedAt: a.published,
       }));
 
     return NextResponse.json({ articles });
