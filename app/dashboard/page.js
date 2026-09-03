@@ -351,9 +351,6 @@ export default function DashboardPage() {
   const [subLoading, setSubLoading] = useState(true);
   const [checkoutLoading, setCheckoutLoading] = useState(false);
   const [aiRanking, setAiRanking] = useState(null);
-  const [aiLoading, setAiLoading] = useState(false);
-  const [aiError, setAiError] = useState(null);
-  const [aiGeneratedAt, setAiGeneratedAt] = useState(null);
   const [aiChecked, setAiChecked] = useState(false);
   const liveNow = useMemo(() => isTournamentLiveET(), []);
 
@@ -497,15 +494,13 @@ export default function DashboardPage() {
     let cancelled = false;
     setAiChecked(false);
     setAiRanking(null);
-    setAiError(null);
 
     fetch(`/api/ai-rank?tournament=${encodeURIComponent(tournament)}&year=${encodeURIComponent(year)}`)
       .then((r) => r.json())
       .then((data) => {
         if (cancelled) return;
-        if (data.players) {
+        if (data.available && data.players) {
           setAiRanking(data.players);
-          setAiGeneratedAt(data.generatedAt);
         }
       })
       .catch(() => {})
@@ -517,26 +512,6 @@ export default function DashboardPage() {
       cancelled = true;
     };
   }, [checkpoint, tournament, year, preds]);
-
-  async function handleGenerateAiRanking() {
-    setAiLoading(true);
-    setAiError(null);
-    try {
-      const res = await fetch("/api/ai-rank", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ tournament, year, rows: preds }),
-      });
-      const data = await res.json();
-      if (!res.ok) throw new Error(data.error || "Failed to generate AI ranking");
-      setAiRanking(data.players);
-      setAiGeneratedAt(data.generatedAt);
-    } catch (e) {
-      setAiError(String(e.message || e));
-    } finally {
-      setAiLoading(false);
-    }
-  }
 
   return (
     <main style={{ maxWidth: 1100, margin: "0 auto", padding: "24px 16px" }}>
@@ -644,20 +619,12 @@ export default function DashboardPage() {
               <h3 style={{ marginTop: 32 }}>AI-enhanced ranking</h3>
               {!aiRanking && aiChecked && (
                 <div style={infoBoxStyle}>
-                  No AI ranking yet for {tournament} {year}.{" "}
-                  <button onClick={handleGenerateAiRanking} disabled={aiLoading} style={aiButtonStyle}>
-                    {aiLoading ? "Researching players (this can take a minute)..." : "Generate AI ranking"}
-                  </button>
+                  AI ranking for {tournament} {year} isn&rsquo;t ready yet — it&rsquo;s generated automatically once
+                  this week&rsquo;s predictions are published, usually within a few minutes of the CSV update.
                 </div>
               )}
-              {aiError && <div style={{ color: "#f85149", marginTop: 8 }}>Error: {aiError}</div>}
               {aiRanking && (
                 <>
-                  {aiGeneratedAt && (
-                    <div style={{ color: "#8b949e", fontSize: 12, marginBottom: 8 }}>
-                      Generated {new Date(aiGeneratedAt).toLocaleString()}
-                    </div>
-                  )}
                   <div style={{ overflowX: "auto" }}>
                     <table style={tableStyle}>
                       <thead>
@@ -739,18 +706,6 @@ const subscribeButtonStyle = {
   color: "#fff",
   fontWeight: 600,
   fontSize: 15,
-  cursor: "pointer",
-};
-
-const aiButtonStyle = {
-  marginLeft: 8,
-  padding: "6px 12px",
-  borderRadius: 6,
-  border: "none",
-  background: "#ff4b4b",
-  color: "#fff",
-  fontWeight: 600,
-  fontSize: 13,
   cursor: "pointer",
 };
 

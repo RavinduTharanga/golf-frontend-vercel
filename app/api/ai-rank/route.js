@@ -1,76 +1,72 @@
 import { NextResponse } from "next/server";
-import Anthropic from "@anthropic-ai/sdk";
-import { getAiRanking, saveAiRanking } from "@/lib/aiRankings";
+import { S3Client, GetObjectCommand } from "@aws-sdk/client-s3";
 
 export const runtime = "nodejs";
-// Web search can take a while across 10 players -- give the function room
-// beyond Vercel's default timeout.
-export const maxDuration = 60;
 
-const client = new Anthropic();
+const s3 = new S3Client({
+  region: process.env.AWS_REGION || "us-east-1",
+  credentials: {
+    accessKeyId: process.env.AWS_ACCESS_KEY_ID,
+    secretAccessKey: process.env.AWS_SECRET_ACCESS_KEY,
+  },
+});
 
-function buildPrompt(tournament, year, rows) {
-  const playerList = rows
-    .map((r) => `${r.rank}. ${r.player_name} - model probability ${(r.p * 100).toFixed(1)}%`)
-    .join("\n");
+// Minimal CSV parser (quoted-field aware) -- matches the writer in ai-rank-lambda.
+function parseCsv(text) {
+  const rows = [];
+  let row = [];
+  let field = "";
+  let inQuotes = false;
 
-  return `You are analyzing the field for the ${tournament} (${year}) PGA Tour event.
-
-Here are our model's top-10 picks to finish in the top 10, ranked by the model's own probability estimate:
-
-${playerList}
-
-Research each player using web search: recent form/news, any injury or withdrawal reports, how their game fits this course, and the weather forecast for tournament week if relevant. Then re-rank these same 10 players (do not add or remove anyone) based on your combined judgment of the model's number plus what you find.
-
-Respond with ONLY a JSON object in this exact shape, no other text before or after:
-{"players":[{"player_name":"<same as input>","ai_rank":<1-10>,"ai_score":<0-1 float>,"rationale":"<1-2 sentence reason>"}]}`;
-}
-
-function extractJson(text) {
-  const match = text.match(/\{[\s\S]*\}/);
-  if (!match) throw new Error("No JSON found in AI response");
-  return JSON.parse(match[0]);
-}
-
-async function runAiRanking(tournament, year, rows) {
-  const tools = [{ type: "web_search_20260209", name: "web_search", max_uses: 20 }];
-  const messages = [{ role: "user", content: buildPrompt(tournament, year, rows) }];
-
-  let finalMessage;
-  // A long agentic web-search turn can pause; resume until it actually finishes.
-  for (let i = 0; i < 5; i++) {
-    const stream = client.messages.stream({
-      model: "claude-sonnet-5",
-      max_tokens: 16000,
-      thinking: { type: "adaptive" },
-      output_config: { effort: "high" },
-      tools,
-      messages,
-    });
-    finalMessage = await stream.finalMessage();
-
-    if (finalMessage.stop_reason === "pause_turn") {
-      messages.push({ role: "assistant", content: finalMessage.content });
-      continue;
+  for (let i = 0; i < text.length; i++) {
+    const c = text[i];
+    if (inQuotes) {
+      if (c === '"') {
+        if (text[i + 1] === '"') {
+          field += '"';
+          i++;
+        } else {
+          inQuotes = false;
+        }
+      } else {
+        field += c;
+      }
+    } else if (c === '"') {
+      inQuotes = true;
+    } else if (c === ",") {
+      row.push(field);
+      field = "";
+    } else if (c === "\n") {
+      row.push(field);
+      rows.push(row);
+      row = [];
+      field = "";
+    } else if (c !== "\r") {
+      field += c;
     }
-    break;
   }
+  if (field.length > 0 || row.length > 0) {
+    row.push(field);
+    rows.push(row);
+  }
+  return rows;
+}
 
-  const textBlock = finalMessage.content.find((b) => b.type === "text");
-  if (!textBlock) throw new Error("AI response had no text content");
+function csvToObjects(text) {
+  const rows = parseCsv(text).filter((r) => r.length > 1 || (r.length === 1 && r[0] !== ""));
+  if (rows.length === 0) return [];
+  const header = rows[0].map((h) => h.trim());
+  return rows.slice(1).map((r) => {
+    const obj = {};
+    header.forEach((h, i) => (obj[h] = r[i]));
+    return obj;
+  });
+}
 
-  const parsed = extractJson(textBlock.text);
-
-  const originalByName = {};
-  for (const r of rows) originalByName[r.player_name] = r.rank;
-
-  return parsed.players.map((p) => ({
-    player_name: p.player_name,
-    original_rank: originalByName[p.player_name] ?? null,
-    ai_rank: p.ai_rank,
-    ai_score: p.ai_score,
-    rationale: p.rationale,
-  }));
+async function streamToString(stream) {
+  const chunks = [];
+  for await (const chunk of stream) chunks.push(chunk);
+  return Buffer.concat(chunks).toString("utf-8");
 }
 
 export async function GET(request) {
@@ -81,34 +77,27 @@ export async function GET(request) {
     return NextResponse.json({ error: "tournament and year are required" }, { status: 400 });
   }
 
+  const safeName = `${tournament}_${year}`.replace(/\s+/g, "_");
+  const key = `predictions/ai_ranked/${safeName}_ai_ranked.csv`;
+
   try {
-    const cached = await getAiRanking(tournament, year);
-    if (cached) {
-      return NextResponse.json({ cached: true, players: cached.players, generatedAt: cached.generatedAt });
-    }
-    return NextResponse.json({ cached: false });
+    const obj = await s3.send(new GetObjectCommand({ Bucket: process.env.S3_BUCKET, Key: key }));
+    const csvText = await streamToString(obj.Body);
+    const rows = csvToObjects(csvText);
+
+    const players = rows.map((r) => ({
+      player_name: r.player_name,
+      original_rank: r.original_rank ? Number(r.original_rank) : null,
+      ai_rank: Number(r.ai_rank),
+      ai_score: r.ai_score !== "" ? Number(r.ai_score) : null,
+      rationale: r.rationale,
+    }));
+
+    return NextResponse.json({ available: true, players });
   } catch (err) {
-    return NextResponse.json({ error: String(err.message || err) }, { status: 500 });
-  }
-}
-
-export async function POST(request) {
-  try {
-    const { tournament, year, rows } = await request.json();
-    if (!tournament || !year || !Array.isArray(rows) || rows.length === 0) {
-      return NextResponse.json({ error: "tournament, year, and rows are required" }, { status: 400 });
+    if (err.name === "NoSuchKey") {
+      return NextResponse.json({ available: false });
     }
-
-    const cached = await getAiRanking(tournament, year);
-    if (cached) {
-      return NextResponse.json({ cached: true, players: cached.players, generatedAt: cached.generatedAt });
-    }
-
-    const players = await runAiRanking(tournament, year, rows);
-    const saved = await saveAiRanking(tournament, year, players);
-
-    return NextResponse.json({ cached: false, players: saved.players, generatedAt: saved.generatedAt });
-  } catch (err) {
     return NextResponse.json({ error: String(err.message || err) }, { status: 500 });
   }
 }
